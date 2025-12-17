@@ -1,6 +1,6 @@
 ---
 - name: Build backup reporter list with defaults + executable
-  set_fact:
+  ansible.builtin.set_fact:
     backup_reporter_list: >-
       {{ backup_reporter_list + [ backup_reporter_defaults
         | combine(item) | combine({

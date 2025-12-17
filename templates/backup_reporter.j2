@@ -15,5 +15,6 @@ customer: "{{ item.customer | default('') }}"
 supposed_backups_count: "{{ item.supposed_backups_count | default('') }}"
 description: "{{ item.description }}"
 
-bucket:
-{{ item.bucket | to_nice_yaml(indent=2) }}
+{{ { 'bucket': item.bucket } | to_nice_yaml(indent=2) }}
+
+{{ { 'destination': item.destination } | to_nice_yaml(indent=2)  }}
