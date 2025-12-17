@@ -38,6 +38,36 @@
   loop: "{{ backup_reporter_list }}"
   when: backup_reporter_list | length > 0
 
+- name: Self-hosted installation
+  when: backup_reporter_docker_image == ''
+  block:
+    - name: Ensure pip is installed
+      ansible.builtin.package:
+        name:
+          - python3-pip
+          - python3-venv
+          - python3-virtualenv
+        state: present
+
+    - name: Ensure pip3 is latest version and required packages installed
+      ansible.builtin.pip:
+        executable: pip3
+        name: pip
+        state: latest
+
+    - name: Ensure virtualenv
+      ansible.builtin.shell:
+        cmd: "{{ backup_reporter_python_executable }} -m venv backup_reporter"
+      args:
+        chdir: "/opt"
+        creates: "/opt/backup_reporter"
+
+    - name: Ensure backup-reporter python package
+      ansible.builtin.pip:
+        virtualenv: "/opt/backup_reporter"
+        name: backup-reporter
+        state: latest
+
 - name: Set daily cron-job with reporter
   ansible.builtin.cron:
     name: "Backup report {{ item.config_name }}"
