@@ -4,10 +4,10 @@
     backup_reporter_list: >-
       {{ backup_reporter_list + [ backup_reporter_defaults
         | combine(item) | combine({
-          'backup_reporter_executable': (
-            '/usr/bin/docker run --rm '
-            ~ '-v ' ~ backup_reporter_config_dir ~ ':' ~ backup_reporter_config_dir ~ ':ro '
-            ~ '-v ' ~ item.backups_dir ~ ':' ~ item.backups_dir ~ ':ro '
+          'executable': (
+            '/usr/bin/docker run --rm --name tmp-backup-reporter-' ~ lookup('pipe', 'uuidgen')
+            ~ ' -v ' ~ backup_reporter_config_dir ~ ':' ~ backup_reporter_config_dir ~ ':ro '
+            ~ '-v ' ~ item.backups_dir | default(backup_reporter_backups_dir) ~ ':' ~ item.backups_dir | default(backup_reporter_backups_dir) ~ ':ro '
             ~ backup_reporter_docker_image
           ) if backup_reporter_docker_image != '' else '/opt/backup_reporter/bin/backup-reporter'
         })
@@ -41,8 +41,8 @@
 - name: Set daily cron-job with reporter
   ansible.builtin.cron:
     name: "Backup report {{ item.config_name }}"
-    minute: "{{ crontab.minute | default('0') }}"
-    hour: "{{ crontab.hour | default('1') }}"
+    minute: "{{ item.crontab.minute }}"
+    hour: "{{ item.crontab.hour }}"
     job: "{{ item.executable }} --config {{ backup_reporter_config_dir }}/{{ item.config_name }}"
   loop: "{{ backup_reporter_list }}"
   when: backup_reporter_list | length > 0
