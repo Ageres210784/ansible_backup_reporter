@@ -1,0 +1,57 @@
+---
+- name: Build backup reporter list with defaults + executable
+  set_fact:
+    backup_reporter_list: >-
+      {{ backup_reporter_list + [ backup_reporter_defaults
+        | combine(item) | combine({
+          'backup_reporter_executable': (
+            '/usr/bin/docker run --rm '
+            ~ '-v ' ~ backup_reporter_config_dir ~ ':' ~ backup_reporter_config_dir ~ ':ro '
+            ~ '-v ' ~ item.backups_dir ~ ':' ~ item.backups_dir ~ ':ro '
+            ~ backup_reporter_docker_image
+          ) if backup_reporter_docker_image != '' else '/opt/backup_reporter/bin/backup-reporter'
+        })
+      ] }}
+  loop: "{{ backup_reporters }}"
+  tags:
+    - always
+
+- name: Ensure config directory
+  ansible.builtin.file:
+    path: "{{ backup_reporter_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Set google credentials json
+  ansible.builtin.copy:
+    dest: "{{ backup_reporter_config_dir }}/google_creds_{{ item.config_name }}"
+    content: "{{ item.google_spreadsheet_credentials }}"
+    mode: '0700'
+  loop: "{{ backup_reporter_list }}"
+  when: backup_reporter_list | length > 0
+
+- name: Render backup reporter config
+  ansible.builtin.template:
+    src: backup_reporter.j2
+    dest: "{{ backup_reporter_config_dir }}/{{ item.config_name }}"
+    mode: '0700'
+  loop: "{{ backup_reporter_list }}"
+  when: backup_reporter_list | length > 0
+
+- name: Set daily cron-job with reporter
+  ansible.builtin.cron:
+    name: "Backup report {{ item.config_name }}"
+    minute: "{{ crontab.minute | default('0') }}"
+    hour: "{{ crontab.hour | default('1') }}"
+    job: "{{ item.executable }} --config {{ backup_reporter_config_dir }}/{{ item.config_name }}"
+  loop: "{{ backup_reporter_list }}"
+  when: backup_reporter_list | length > 0
+
+- name: Explicitly run report command
+  ansible.builtin.shell:
+    cmd: "{{ item.executable }} --config {{ backup_reporter_config_dir }}/{{ item.config_name }}"
+  loop: "{{ backup_reporter_list }}"
+  when: backup_reporter_list | length > 0
+  tags:
+    - never
+    - report

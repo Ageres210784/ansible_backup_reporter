@@ -1,0 +1,19 @@
+docker_postgres: {{ item.docker_postgres }}
+container_name: "{{ item.container_name }}"
+files_bucket: {{ item.files_bucket }}
+files: {{ item.files }}
+files_mask: "{{ item.files_mask }}"
+backups_dir: "{{ item.backups_dir }}"
+
+collector: {{ item.collector }}
+
+sheet_owner: "{{ item.sheet_owner }}"
+google_spreadsheet_credentials_path: "{{ backup_reporter_config_dir }}/google_creds_{{ item.config_name }}"
+spreadsheet_name: "{{ item.spreadsheet_name }}"
+worksheet_name: "{{ item.worksheet_name }}"
+customer: "{{ item.customer | default('') }}"
+supposed_backups_count: "{{ item.supposed_backups_count | default('') }}"
+description: "{{ item.description }}"
+
+bucket:
+{{ item.bucket | to_nice_yaml(indent=2) }}

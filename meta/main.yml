@@ -1,0 +1,12 @@
+galaxy_info:
+  author: Sergey Evseev
+  description: Ansible role to install backup-reporter
+  company: oomag
+
+  license: Apache
+
+  min_ansible_version: 2.17
+
+  galaxy_tags: [backup-reporter]
+
+dependencies: []

@@ -1,0 +1,23 @@
+---
+backup_reporters: []
+backup_reporter_config_dir: /etc/backup-reporter
+backup_reporter_python_executable: python3
+backup_reporter_docker_image: ''
+backup_reporter_defaults:
+  config_name: 'backup_reporter_config.yml'
+  google_spreadsheet_credentials: ''
+  docker_postgres: False
+  container_name: 'None'
+  files_bucket: False
+  files: False
+  files_mask: '*.tar.gz'
+  backups_dir: '/var/backups'
+  collector: False
+  sheet_owner: 'None'
+  spreadsheet_name: 'None'
+  worksheet_name: 'None'
+  bucket: []
+  customer: ''
+  supposed_backups_count: ''
+  description: ''
+backup_reporter_list: []
