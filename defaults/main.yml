@@ -16,6 +16,7 @@ backup_reporter_defaults:
   files: False
   files_mask: '*.tar.gz'
   backups_dir: '{{ backup_reporter_backups_dir }}'
+  host_metadata_dir: "/var/metadata"
   collector: False
   sheet_owner: 'None'
   spreadsheet_name: 'None'
